@@ -23,6 +23,7 @@ state = env.reset()
 replay_memory = deque(maxlen=30000)
 
 epoch = 0
+highest_score=0
 while epoch < 10000:
     next_steps = env.get_next_states()
     epsilon = 1e-3 + (max(2000 - epoch, 0) * (
@@ -91,10 +92,10 @@ while epoch < 10000:
     writer.add_scalar('Train/Cleared lines', final_cleared_lines, epoch - 1)
 
 
-    if epoch > 0 and epoch % 1000 == 0:
-        torch.save(model, "{}/tetris_{}".format("saved_models/", epoch))
+    if epoch > 0 and final_score>highest_score:
+        torch.save(model, "{}/tetrisNew_{}".format("saved_models/", epoch))
 
-    torch.save(model, "{}/tetris".format("saved_models/"))
+    torch.save(model, "{}/tetrisNew".format("saved_models/"))
 
 
 
