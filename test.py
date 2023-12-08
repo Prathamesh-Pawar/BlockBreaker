@@ -23,7 +23,7 @@ from tetris import Tetris
 
 
 def test():
-    saved_path  = "saved_models/"
+    saved_path  = "saved_models"
     output = "output.mp4"
     fps  = 20
     block_size = 30
@@ -35,9 +35,9 @@ def test():
     else:
         torch.manual_seed(123)
     if torch.cuda.is_available():
-        model = torch.load("{}/tetrisNew_2000".format(saved_path))
+        model = torch.load("{}/tetris_3131".format(saved_path))
     else:
-        model = torch.load("{}/tetrisNew_2000".format(saved_path), map_location=lambda storage, loc: storage)
+        model = torch.load("{}/tetris_3131".format(saved_path), map_location=lambda storage, loc: storage)
     model.eval()
     env = Tetris(width=width, height=height, block_size=block_size)
     env.reset()

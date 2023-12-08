@@ -20,7 +20,9 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 criterion = nn.MSELoss()
 
 state = env.reset()
-replay_memory = deque(maxlen=30000)
+replay_memory = deque(maxlen=1)
+logsReward=[]
+logsLoss=[]
 
 epoch = 0
 highest_score=0
@@ -56,10 +58,10 @@ while epoch < 10000:
     else:
         state = next_state
         continue
-    if len(replay_memory) < 30000 / 10:
+    if len(replay_memory) < 1:
         continue
     epoch += 1
-    batch = sample(replay_memory, min(len(replay_memory), 32))
+    batch = sample(replay_memory, min(len(replay_memory), 1))
     state_batch, reward_batch, next_state_batch, done_batch = zip(*batch)
     state_batch = torch.stack(tuple(state for state in state_batch))
     reward_batch = torch.from_numpy(np.array(reward_batch, dtype=np.float32)[:, None])
@@ -80,6 +82,9 @@ while epoch < 10000:
     loss.backward()
     optimizer.step()
 
+    logsLoss.append(loss)
+    logsReward.append(final_score)
+
     print("Epoch: {}/{}, Action: {}, Score: {}, Tetrominoes {}, Cleared lines: {}".format(
         epoch,
         10000,
@@ -92,10 +97,25 @@ while epoch < 10000:
     writer.add_scalar('Train/Cleared lines', final_cleared_lines, epoch - 1)
 
 
-    if epoch > 0 and final_score>highest_score:
-        torch.save(model, "{}/tetrisNew_{}".format("saved_models/", epoch))
 
-    torch.save(model, "{}/tetrisNew".format("saved_models/"))
+    if epoch > 0 and final_score>highest_score:
+        highest_score = final_score
+
+        # Open a file in write mode ('w'
+
+        torch.save(model, "{}/tetris_{}".format("saved_models/Bad Final Trained", epoch))
+
+    with open('saved_models/Bad Final Trained/LossLog.txt', 'w') as file:
+        # Write each element of the list to a new line in the file
+        for item in logsLoss:
+            file.write(str(item.item()) + '\n')
+
+    with open('saved_models/Bad Final Trained/RewardLog.txt', 'w') as file:
+        # Write each element of the list to a new line in the file
+        for item in logsReward:
+            file.write(str(item) + '\n')
+
+    # torch.save(model, "{}/tetris".format("saved_models/"))
 
 
 
